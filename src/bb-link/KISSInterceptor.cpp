@@ -13,7 +13,7 @@ KISSInterceptor::KISSInterceptor()
 bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t size, extended_hw_cmd_t *cmd)
 {
   // Look for frame start
-  for (int i = 0; i < size; i++)
+  for (size_t i = 0; i + 1 < size; i++)
   {
     if (buffer[i] == FEND)
     {
@@ -43,7 +43,11 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
             Log.errorln("Failed to unescape frame");
             return false;
           }
-
+          if (unescapedSize < 4)
+          {
+          Log.errorln("Hardware command frame too short");
+          return false;
+          }
           Log.traceln("Found valid hardware cmd");
 
           char hexString[3 * unescapedSize + 1];
@@ -151,10 +155,16 @@ bool KISSInterceptor::unescape(uint8_t *buffer, size_t size, uint8_t *result, si
   {
     if (*src == FESC)
     {
-      src++;
-      if (*src == TFEND)
-      {
-        *dst = FEND;
+    src++;
+
+    if (src >= buffer + size)
+    {
+      return false;
+    }
+
+    if (*src == TFEND)
+     {
+      *dst = FEND;
       }
       else if (*src == TFESC)
       {
