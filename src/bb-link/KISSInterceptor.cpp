@@ -18,6 +18,11 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
   {
     return false;
   }
+
+  if (size < 4)
+  {
+    return false;
+  }
   
   // Look for frame start
   for (size_t i = 0; i + 1 < size; i++)
