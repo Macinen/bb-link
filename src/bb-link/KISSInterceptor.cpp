@@ -1,5 +1,6 @@
 #include <ArduinoLog.h>
 #include "KISSInterceptor.h"
+#include <limits.h>
 
 static const uint8_t FEND = 0xC0;
 static const uint8_t FESC = 0xDB;
@@ -215,9 +216,18 @@ bool KISSInterceptor::unescape(uint8_t *buffer, size_t size, uint8_t *result, si
 // Output buffer is assumed to be large enough to hold the escaped data
 bool KISSInterceptor::escape(uint8_t *buffer, size_t size, uint8_t *result, size_t *resultSize)
 {
+  if (buffer == nullptr || result == nullptr || resultSize == nullptr)
+  {
+    return false;
+  }
   uint8_t *src = buffer;
   uint8_t *dst = result;
   size_t dstSize = *resultSize;
+
+  if (size > (SIZE_MAX - 2) / 2)
+  {
+    return false;
+  }
 
   if (dstSize < size * 2 + 2)
   {
