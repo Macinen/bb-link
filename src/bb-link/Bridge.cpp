@@ -719,7 +719,13 @@ void Bridge::onWrite(BLECharacteristic *pCharacteristic)
     Log.traceln("BLE Rx: %i", txValue.length());
 
     extended_hw_cmd_t cmd;
-    if (kissInterceptor.extractExtendedHardwareCommand((uint8_t *)pCharacteristic->getData(), txValue.length(), &cmd))
+    size_t consumed = 0;
+
+    if (kissInterceptor.extractExtendedHardwareCommand(
+        (uint8_t *)pCharacteristic->getData(),
+        txValue.length(),
+        &cmd,
+        &consumed))
     {
       Log.traceln("BLE: queueing extended hardware command");
       cmdQueue.enqueue(cmd);
