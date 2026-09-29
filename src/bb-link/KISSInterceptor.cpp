@@ -59,7 +59,7 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
           // Display hex content of buffer
           Log.traceln("Frame: %s", hexString);
 
-          switch (unescapedBuffer[i + 2])
+          switch (unescapedBuffer[2])
           {
           case EXTENDED_HW_CMD_SET_FREQUENCY:
           {
@@ -142,9 +142,15 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
             return true;
 
           case EXTENDED_HW_CMD_SET_RIG_CTRL:
+            if (unescapedSize < 5)
+            {
+              Log.errorln("Set rig control frame too short");
+              return false;
+            }
+
             Log.infoln("Set rig control cmd");
             cmd->action = extended_hw_set_rig_ctrl;
-            cmd->data.uint8 = unescapedBuffer[i + 3];
+            cmd->data.uint8 = unescapedBuffer[3];
             return true;
 
           case EXTENDED_HW_CMD_FACTORY_RESET:
