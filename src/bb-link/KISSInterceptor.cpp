@@ -237,7 +237,7 @@ bool KISSInterceptor::escape(uint8_t *buffer, size_t size, uint8_t *result, size
   *dst = FEND;
   dst++;
 
-  for (int i = 0; i < size; i++)
+  for (size_t i = 0; i < size; i++)
   {
     if (*src == FEND)
     {
