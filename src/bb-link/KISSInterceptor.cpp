@@ -6,6 +6,7 @@ static const uint8_t FEND = 0xC0;
 static const uint8_t FESC = 0xDB;
 static const uint8_t TFEND = 0xDC;
 static const uint8_t TFESC = 0xDD;
+static const size_t MAX_KISS_HW_FRAME_SIZE = 32;
 
 KISSInterceptor::KISSInterceptor()
 {
@@ -34,10 +35,17 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
 
           // Unescape only the complete KISS frame from i through j
           size_t frameSize = j - i + 1;
-          uint8_t unescapedBuffer[frameSize];
-          size_t unescapedSize;
 
-          if (!unescape(&buffer[i], frameSize, unescapedBuffer, &unescapedSize))
+        if (frameSize > MAX_KISS_HW_FRAME_SIZE)
+        {
+          Log.errorln("Hardware command frame too large: %d", frameSize);
+          return false;
+        }
+
+        uint8_t unescapedBuffer[MAX_KISS_HW_FRAME_SIZE];
+        size_t unescapedSize;
+
+        if (!unescape(&buffer[i], frameSize, unescapedBuffer, &unescapedSize))
           {
             Log.errorln("Failed to unescape frame");
             return false;
