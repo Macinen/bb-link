@@ -49,14 +49,14 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
           }
           Log.traceln("Found valid hardware cmd");
 
-          char hexString[3 * unescapedSize + 1];
-          for (int k = 0; k < unescapedSize; k++)
+          Log.trace("Frame: ");
+
+          for (size_t k = 0; k < unescapedSize; k++)
           {
-            sprintf(&hexString[3 * k], "%02X ", unescapedBuffer[k]);
+            Log.trace("%02X ", unescapedBuffer[k]);
           }
 
-          // Display hex content of buffer
-          Log.traceln("Frame: %s", hexString);
+          Log.traceln("");
 
           switch (unescapedBuffer[2])
           {
