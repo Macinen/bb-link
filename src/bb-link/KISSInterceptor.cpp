@@ -32,7 +32,7 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
       // Fast check for hardware command
       if (buffer[i + 1] != CMD_HARDWARE)
       {
-        break;
+        continue;
       }
 
       Log.traceln("Found SET HW KISS frame start at index %d", i);
