@@ -31,14 +31,12 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
         {
           Log.traceln("Found frame end at index %d", j);
 
-          // Copy frame to new buffer
-          uint8_t frame[j - i + 1];
-          memcpy(frame, &buffer[i], j - i + 1);
-
-          // Unescape frame
-          uint8_t unescapedBuffer[size];
+          // Unescape only the complete KISS frame from i through j
+          size_t frameSize = j - i + 1;
+          uint8_t unescapedBuffer[frameSize];
           size_t unescapedSize;
-          if (!unescape(&buffer[i], size - i, unescapedBuffer, &unescapedSize))
+
+          if (!unescape(&buffer[i], frameSize, unescapedBuffer, &unescapedSize))
           {
             Log.errorln("Failed to unescape frame");
             return false;
