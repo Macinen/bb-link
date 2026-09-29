@@ -63,8 +63,13 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
           {
           case EXTENDED_HW_CMD_SET_FREQUENCY:
           {
-            uint32_t frequency = (unescapedBuffer[i + 3] << 24) | (unescapedBuffer[i + 4] << 16) |
-                                 (unescapedBuffer[i + 5] << 8) | unescapedBuffer[i + 6];
+            if (unescapedSize < 8)
+          {
+            Log.errorln("Set frequency frame too short");
+            return false;
+          }
+          uint32_t frequency = (unescapedBuffer[3] << 24) | (unescapedBuffer[4] << 16) |
+                              (unescapedBuffer[5] << 8) | unescapedBuffer[6];
             Log.infoln("Set frequency cmd: %d", frequency);
             cmd->action = extended_hw_set_frequency;
             cmd->data.uint32 = frequency;
@@ -77,7 +82,13 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
 
           case EXTENDED_HW_CMD_SET_BAUD_RATE:
           {
-            uint8_t baud_rate = unescapedBuffer[i + 3];
+            if (unescapedSize < 5)
+            {
+              Log.errorln("Set baud rate frame too short");
+              return false;
+            }
+
+            uint8_t baud_rate = unescapedBuffer[3];
             Log.infoln("Set baud rate cmd: %d", baud_rate);
             cmd->action = extended_hw_set_baud_rate;
             cmd->data.uint8 = baud_rate;
@@ -94,9 +105,15 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
             return true;
 
           case EXTENDED_HW_CMD_PAIR_WITH_DEVICE:
+            if (unescapedSize < 10)
+            {
+              Log.errorln("Pair with device frame too short");
+              return false;
+            }
+
             Log.infoln("Pair with device cmd");
             cmd->action = extended_hw_pair_with_device;
-            memcpy(cmd->data.bytes, &unescapedBuffer[i + 3], ESP_BD_ADDR_LEN);
+            memcpy(cmd->data.bytes, &unescapedBuffer[3], ESP_BD_ADDR_LEN);
             return true;
 
           case EXTENDED_HW_CMD_CLEAR_PAIRED_DEVICE:
