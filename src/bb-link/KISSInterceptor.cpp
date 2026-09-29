@@ -14,6 +14,11 @@ KISSInterceptor::KISSInterceptor()
 
 bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t size, extended_hw_cmd_t *cmd)
 {
+  if (buffer == nullptr || cmd == nullptr)
+  {
+    return false;
+  }
+  
   // Look for frame start
   for (size_t i = 0; i + 1 < size; i++)
   {
