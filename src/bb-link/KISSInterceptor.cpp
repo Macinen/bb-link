@@ -170,6 +170,10 @@ bool KISSInterceptor::extractExtendedHardwareCommand(uint8_t *buffer, size_t siz
 
 bool KISSInterceptor::unescape(uint8_t *buffer, size_t size, uint8_t *result, size_t *resultSize)
 {
+  if (buffer == nullptr || result == nullptr || resultSize == nullptr)
+  {
+    return false;
+  }
   uint8_t *src = buffer;
   uint8_t *dst = result;
   while(src < buffer + size)
