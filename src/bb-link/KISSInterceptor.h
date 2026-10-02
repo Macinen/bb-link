@@ -73,6 +73,7 @@ public:
     uint8_t *buffer,
     size_t size,
     extended_hw_cmd_t *cmd,
+    size_t *frameStart,
     size_t *consumed);
   bool escape(uint8_t *buffer, size_t size, uint8_t *result, size_t *resultSize);
   bool unescape(uint8_t *buffer, size_t size, uint8_t *unescapedBuffer, size_t *unescapedSize);

@@ -717,20 +717,64 @@ void Bridge::onWrite(BLECharacteristic *pCharacteristic)
   if (txValue.length() > 0)
   {
     Log.traceln("BLE Rx: %i", txValue.length());
+    uint8_t *data = (uint8_t *)pCharacteristic->getData();
+    size_t offset = 0;
+    bool hardwareCommandFound = false;
+    bool remainingData = false;
 
-    extended_hw_cmd_t cmd;
-    size_t consumed = 0;
-
-    if (kissInterceptor.extractExtendedHardwareCommand(
-        (uint8_t *)pCharacteristic->getData(),
-        txValue.length(),
-        &cmd,
-        &consumed))
+    while (offset < txValue.length())
     {
+      extended_hw_cmd_t cmd;
+      size_t frameStart = 0;
+      size_t consumed = 0;
+
+      if (!kissInterceptor.extractExtendedHardwareCommand(
+          data + offset,
+          txValue.length() - offset,
+          &cmd,
+          &frameStart,
+          &consumed))
+      {
+        remainingData = true;
+        break;
+      }
+
+      if (frameStart > 0)
+      {
+        if (!btcStateMachine.isInState(btcConnectedState))
+        {
+          offset += frameStart;
+          continue;
+        }
+
+        if (processingCmdQueue || !cmdQueue.isEmpty())
+        {
+          Log.traceln("BLE: dropping data while still processing hw commands");
+          return;
+        }
+
+        Log.traceln("BLE > BTC before HW cmd: %i", frameStart);
+        btSerial.write(data + offset, frameStart);
+        setTxLinger(BYTE_TRANSMIT_TIME * frameStart);
+
+        offset += frameStart;
+        continue;
+      }
+
       Log.traceln("BLE: queueing extended hardware command");
       cmdQueue.enqueue(cmd);
+
+      hardwareCommandFound = true;
+
+      if (consumed == 0)
+      {
+        break;
+      }
+
+      offset += consumed;
     }
-    else if (btcStateMachine.isInState(btcConnectedState))
+
+    if ((!hardwareCommandFound || remainingData) && btcStateMachine.isInState(btcConnectedState))
     {
       // Drop data if we're still processing cmds
       // This is to avoid sending data to the radio while it may not have changed frequency yet
@@ -739,10 +783,15 @@ void Bridge::onWrite(BLECharacteristic *pCharacteristic)
         Log.traceln("BLE: dropping data while still processing hw commands");
         return;
       }
+      size_t dataLength = txValue.length() - offset;
+      if (dataLength == 0)
+      {
+        return;
+      }
 
-      Log.traceln("BLE > BTC: %i", txValue.length());
-      btSerial.write(pCharacteristic->getData(), txValue.length());
-      setTxLinger(BYTE_TRANSMIT_TIME * txValue.length());
+      Log.traceln("BLE > BTC: %i", dataLength);
+      btSerial.write(data + offset, dataLength);
+      setTxLinger(BYTE_TRANSMIT_TIME * dataLength);
     }
   }
 }

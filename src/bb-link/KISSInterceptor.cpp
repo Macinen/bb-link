@@ -16,13 +16,16 @@ bool KISSInterceptor::extractExtendedHardwareCommand(
     uint8_t *buffer,
     size_t size,
     extended_hw_cmd_t *cmd,
+    size_t *frameStart,
     size_t *consumed)
 {
-  if (buffer == nullptr || cmd == nullptr || consumed == nullptr)
+  if (buffer == nullptr || cmd == nullptr ||
+      frameStart == nullptr || consumed == nullptr)
   {
     return false;
   }
 
+  *frameStart = 0;
   *consumed = 0;
 
   if (size < 4)
@@ -43,7 +46,7 @@ bool KISSInterceptor::extractExtendedHardwareCommand(
 
       Log.traceln("Found SET HW KISS frame start at index %d", i);
       // Look for frame end
-      for (int j = i + 1; j < size; j++)
+      for (size_t j = i + 1; j < size; j++)
       {
         if (buffer[j] == FEND)
         {
@@ -96,12 +99,14 @@ bool KISSInterceptor::extractExtendedHardwareCommand(
             Log.infoln("Set frequency cmd: %d", frequency);
             cmd->action = extended_hw_set_frequency;
             cmd->data.uint32 = frequency;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
           }
           case EXTENDED_HW_CMD_RESTORE_FREQUENCY:
             Log.infoln("Restore frequency cmd");
             cmd->action = extended_hw_restore_frequency;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
@@ -117,18 +122,21 @@ bool KISSInterceptor::extractExtendedHardwareCommand(
             Log.infoln("Set baud rate cmd: %d", baud_rate);
             cmd->action = extended_hw_set_baud_rate;
             cmd->data.uint8 = baud_rate;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
           }
           case EXTENDED_HW_CMD_START_SCAN:
             Log.infoln("Start scan cmd");
             cmd->action = extended_hw_start_scan;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
           case EXTENDED_HW_CMD_STOP_SCAN:
             Log.infoln("Stop scan cmd");
             cmd->action = extended_hw_stop_scan;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
@@ -142,36 +150,42 @@ bool KISSInterceptor::extractExtendedHardwareCommand(
             Log.infoln("Pair with device cmd");
             cmd->action = extended_hw_pair_with_device;
             memcpy(cmd->data.bytes, &unescapedBuffer[3], ESP_BD_ADDR_LEN);
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
           case EXTENDED_HW_CMD_CLEAR_PAIRED_DEVICE:
             Log.infoln("Clear paired device cmd");
             cmd->action = extended_hw_clear_paired_device;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
           case EXTENDED_HW_CMD_FIRMWARE_VERSION:
             Log.infoln("Firmware version cmd");
             cmd->action = extended_hw_firmware_version;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
           case EXTENDED_HW_CMD_CAPABILITIES:
             Log.infoln("Capabilities cmd");
             cmd->action = extended_hw_capabilities;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
           case EXTENDED_HW_CMD_API_VERSION:
             Log.infoln("API version cmd");
             cmd->action = extended_hw_api_version;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
           case EXTENDED_HW_CMD_GET_PAIRED_DEVICE:
             Log.infoln("Get paired device cmd");
             cmd->action = extended_hw_get_paired_device;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
@@ -185,12 +199,14 @@ bool KISSInterceptor::extractExtendedHardwareCommand(
             Log.infoln("Set rig control cmd");
             cmd->action = extended_hw_set_rig_ctrl;
             cmd->data.uint8 = unescapedBuffer[3];
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
           case EXTENDED_HW_CMD_FACTORY_RESET:
             Log.infoln("Factory reset cmd");
             cmd->action = extended_hw_factory_reset;
+            *frameStart = i;
             *consumed = j + 1;
             return true;
 
