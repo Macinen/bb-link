@@ -11,15 +11,34 @@ test(extractExtendedHardwareCommandUnknown)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x00, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertFalse(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertFalse(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
 }
 
 test(extractExtendedHardwareCommandSetFrequency)
 {
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xEA, 0x01, 0x02, 0x03, 0x04, 0xC0};  
-  extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+ extended_hw_cmd_t cmd;
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
+  assertEqual((size_t)0, frameStart);
+  assertEqual(sizeof(frame), consumed);
+
   assertEqual(extended_hw_set_frequency, cmd.action);
   assertEqual((uint32_t)0x01020304, cmd.data.uint32);
 }
@@ -29,7 +48,15 @@ test(extractExtendedHardwareCommandRestoreFrequency)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xEB, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_restore_frequency, cmd.action);
 }
 
@@ -38,7 +65,15 @@ test(extractExtendedHardwareCommandSetBaudRate)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xF4, 0x01, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_set_baud_rate, cmd.action);
   assertEqual((uint8_t)0x01, cmd.data.uint8);
 }
@@ -48,7 +83,15 @@ test(extractExtendedHardwareCommandStartScan)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xEC, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_start_scan, cmd.action);
 }
 
@@ -57,7 +100,15 @@ test(extractExtendedHardwareCommandStopScan)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xED, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_stop_scan, cmd.action);
 }
 
@@ -66,7 +117,15 @@ test(extractExtendedHardwareCommandPairWithDevice)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xEF, 0x01, 0x02, 0x03, 0x10, 0x20, 0x30, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_pair_with_device, cmd.action);
   assertEqual(0x01, cmd.data.bytes[0]);
   assertEqual(0x02, cmd.data.bytes[1]);
@@ -81,7 +140,15 @@ test(extractExtendedHardwareCommandClearPairedDevice)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xF0, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_clear_paired_device, cmd.action);
 }
 
@@ -90,7 +157,15 @@ test(extractExtendedHardwareCommandFirmwareVersion)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0x28, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_firmware_version, cmd.action);
 }
 
@@ -99,7 +174,15 @@ test(extractExtendedHardwareCommandCapabilities)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0x7E, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_capabilities, cmd.action);
 }
 
@@ -108,7 +191,15 @@ test(extractExtendedHardwareCommandApiVersion)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0x7B, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_api_version, cmd.action);
 }
 
@@ -117,7 +208,15 @@ test(extractExtendedHardwareCommandSetRigCtrl)
   KISSInterceptor kissInterceptor;
   uint8_t frame[] = {0xC0, 0x06, 0xF2, 0x01, 0xC0};  
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+size_t frameStart = 0;
+size_t consumed = 0;
+
+assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+    frame,
+    sizeof(frame),
+    &cmd,
+    &frameStart,
+    &consumed));
   assertEqual(extended_hw_set_rig_ctrl, cmd.action);
   assertEqual((uint8_t)0x01, cmd.data.uint8);
 
@@ -126,9 +225,19 @@ test(extractExtendedHardwareCommandSetRigCtrl)
 test(extractExtendedHardwareCommandFactoryReset)
 {
   KISSInterceptor kissInterceptor;
-  uint8_t frame[] = {0xC0, 0x06, 0xF3, 0xC0};  
+  uint8_t frame[] = {0xC0, 0x06, 0xF3, 0xC0};
+
   extended_hw_cmd_t cmd;
-  assertTrue(kissInterceptor.extractExtendedHardwareCommand(frame, sizeof(frame), &cmd));
+  size_t frameStart = 0;
+  size_t consumed = 0;
+
+  assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+      frame,
+      sizeof(frame),
+      &cmd,
+      &frameStart,
+      &consumed));
+
   assertEqual(extended_hw_factory_reset, cmd.action);
 }
 
