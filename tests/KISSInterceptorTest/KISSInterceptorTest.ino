@@ -72,6 +72,36 @@ test(extractExtendedHardwareCommandSetFrequencyWithLeadingData)
   assertEqual((uint32_t)0x01020304, cmd.data.uint32);
 }
 
+test(extractExtendedHardwareCommandSetFrequencyWithLeadingAndTrailingData)
+{
+  KISSInterceptor kissInterceptor;
+
+  uint8_t frame[] = {
+      0x01, 0x02, 0x03,
+      0xC0, 0x06, 0xEA,
+      0x01, 0x02, 0x03, 0x04,
+      0xC0,
+      0xAA, 0xBB, 0xCC
+  };
+
+  extended_hw_cmd_t cmd;
+  size_t frameStart = 0;
+  size_t consumed = 0;
+
+  assertTrue(kissInterceptor.extractExtendedHardwareCommand(
+      frame,
+      sizeof(frame),
+      &cmd,
+      &frameStart,
+      &consumed));
+
+  assertEqual((size_t)3, frameStart);
+  assertEqual((size_t)11, consumed);
+
+  assertEqual(extended_hw_set_frequency, cmd.action);
+  assertEqual((uint32_t)0x01020304, cmd.data.uint32);
+}
+
 test(extractExtendedHardwareCommandRestoreFrequency)
 {
   KISSInterceptor kissInterceptor;
